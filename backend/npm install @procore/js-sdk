@@ -1,7 +1,0 @@
-import 'isomorphic-fetch';
-import { client, oauth, implicit, me, projects } from '@procore/js-sdk';
-
-export function createProcoreClient(accessToken, refreshFn) {
-  const procore = client(oauth(accessToken, refreshFn));
-  return procore;
-}
