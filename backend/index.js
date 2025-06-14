@@ -1,9 +1,8 @@
+require('dotenv').config(); // Load .env variables
+
 const express = require('express');
 const Procore = require('@procore/js-sdk');
-const dotenv = require('dotenv');
 const axios = require('axios');
-
-dotenv.config(); // Load .env variables
 
 const app = express();
 const PORT = 8000;
