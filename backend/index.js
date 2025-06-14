@@ -1,27 +1,47 @@
 const express = require('express');
+const Procore = require('@procore/js-sdk');
+const dotenv = require('dotenv');
+const axios = require('axios');
+
+dotenv.config(); // Load .env variables
+
 const app = express();
-const PORT = 3001;
+const PORT = 8000;
 
 app.get('/api/hello', (req, res) => {
   res.json({ message: 'Hello from backend' });
 });
 
-app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
-const express = require('express');
-const Procore = require('@procore/js-sdk');
-
-const app = express();
-const PORT = 8000;
-
 app.get('/auth', (req, res) => {
   const client = new Procore.Client({
-    clientID: tvTY_UFuDzFNhucSI
-    clientSecret: QwOiCgzPYYQxqvB
-    redirectUri: https://fieldops360.com/oauth/callback
+    client_id: process.env.PROCORE_CLIENT_ID,
+    client_secret: process.env.PROCORE_CLIENT_SECRET,
+    redirect_uri: process.env.PROCORE_REDIRECT_URI,
   });
 
-  const authUrl = client.getAuthorizationUrl(['openid']);
+  const authUrl = client.getAuthorizationUrl(['openid', 'profile', 'email', 'offline_access']);
   res.redirect(authUrl);
+});
+
+app.get('/oauth/callback', async (req, res) => {
+  const { code } = req.query;
+
+  try {
+    const response = await axios.post('https://login.procore.com/oauth/token', {
+      grant_type: 'authorization_code',
+      code,
+      client_id: process.env.PROCORE_CLIENT_ID,
+      client_secret: process.env.PROCORE_CLIENT_SECRET,
+      redirect_uri: process.env.PROCORE_REDIRECT_URI,
+    });
+
+    const accessToken = response.data.access_token;
+
+    res.json({ message: 'OAuth Success!', token: accessToken });
+  } catch (error) {
+    console.error('OAuth error:', error.message);
+    res.status(500).json({ error: 'OAuth failed' });
+  }
 });
 
 app.listen(PORT, () => {
